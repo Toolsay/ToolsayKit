@@ -4,14 +4,19 @@ import Foundation
 
 @MainActor
 struct UserDefaultsCodableTests {
-    private struct TestSettings: UserDefaultsCodable, Equatable {
+    private final class TestSettings: UserDefaultsCodable {
         var value = 0
+        static let defaultsValue = 42
+
+        func loadDefaults() {
+            value = Self.defaultsValue
+        }
     }
 
     @Test func userDefaultsLoadReturnsDefaultWhenNoData() {
         UserDefaults.standard.removeObject(forKey: "0")
         let loaded = TestSettings.loadFromUserDefaults()
-        #expect(loaded == TestSettings())
+        #expect(loaded.value == TestSettings.defaultsValue)
     }
 
     @Test func userDefaultsSaveAndLoadRoundTrips() {
@@ -23,12 +28,13 @@ struct UserDefaultsCodableTests {
 
         let loaded = TestSettings.loadFromUserDefaults()
         #expect(loaded.value == 123)
+        #expect(loaded.value != TestSettings.defaultsValue)
     }
 
     @Test func userDefaultsLoadReturnsDefaultWhenDataCorrupted() {
         UserDefaults.standard.set(Data([0xFF, 0xFF, 0xFF]), forKey: "0")
         let loaded = TestSettings.loadFromUserDefaults()
-        #expect(loaded == TestSettings())
+        #expect(loaded.value == TestSettings.defaultsValue)
     }
 }
 
