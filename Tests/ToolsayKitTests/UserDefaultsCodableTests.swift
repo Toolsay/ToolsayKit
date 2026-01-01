@@ -22,7 +22,7 @@ struct UserDefaultsCodableTests {
     @Test func userDefaultsSaveAndLoadRoundTrips() {
         UserDefaults.standard.removeObject(forKey: "0")
 
-        var s = TestSettings()
+        let s = TestSettings()
         s.value = 123
         s.saveToUserDefaults()
 

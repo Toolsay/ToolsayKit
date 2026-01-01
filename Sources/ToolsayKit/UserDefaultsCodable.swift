@@ -9,10 +9,12 @@ public protocol UserDefaultsCodable: Codable {
 }
 
 public extension UserDefaultsCodable {
+	func loadDefaults() {}
+
 	/// Reads from user defaults. Falls back to default initialization on failure.
 	static func loadFromUserDefaults() -> Self {
 		guard let data = UserDefaults.standard.data(forKey: "0"), let value = try? PropertyListDecoder().decode(Self.self, from: data) else {
-			let value = Self.init()
+			let value = Self()
 			value.loadDefaults()
 			return value
 		}
