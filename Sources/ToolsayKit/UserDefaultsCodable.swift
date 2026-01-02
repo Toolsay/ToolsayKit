@@ -4,25 +4,25 @@ import Foundation
 public protocol UserDefaultsCodable: Codable {
 	init()
 
-	/// Loads default values. Called when the type cannot be deserialized.
-	func loadDefaults()
+	/// Initializes default values when the type cannot be deserialized.
+	func initDefaults()
 }
 
 public extension UserDefaultsCodable {
-	func loadDefaults() {}
+	func initDefaults() {}
 
 	/// Reads from user defaults. Falls back to default initialization on failure.
-	static func loadFromUserDefaults() -> Self {
+	static func load() -> Self {
 		guard let data = UserDefaults.standard.data(forKey: "0"), let value = try? PropertyListDecoder().decode(Self.self, from: data) else {
 			let value = Self()
-			value.loadDefaults()
+			value.initDefaults()
 			return value
 		}
 		return value
 	}
 
 	/// Writes to user defaults. Writing can be delayed and may not complete if the app is terminated via the debugger.
-	func saveToUserDefaults() {
+	func save() {
 		try? UserDefaults.standard.set(PropertyListEncoder().encode(self), forKey: "0")
 	}
 }

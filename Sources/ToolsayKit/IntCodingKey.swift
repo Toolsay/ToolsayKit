@@ -17,7 +17,7 @@ public struct IntCodingKey: CodingKey {
 
 public extension KeyedDecodingContainer<IntCodingKey> {
 	func decode<T>(_ type: T.Type, forKey key: Int) throws -> T where T: Decodable { try decode(type, forKey: .init(intValue: key)!) }
-	func decodeIfPresent<T>(	_ type: T.Type,	forKey key: Int) throws -> T? where T : Decodable  { try decodeIfPresent(type, forKey: .init(intValue: key)!) }
+	func decodeIfPresent<T>(_ type: T.Type, forKey key: Int) throws -> T? where T: Decodable { try decodeIfPresent(type, forKey: .init(intValue: key)!) }
 }
 
 public extension KeyedEncodingContainer<IntCodingKey> {

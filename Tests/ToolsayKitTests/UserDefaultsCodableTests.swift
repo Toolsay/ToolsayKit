@@ -8,14 +8,14 @@ struct UserDefaultsCodableTests {
         var value = 0
         static let defaultsValue = 42
 
-        func loadDefaults() {
+        func initDefaults() {
             value = Self.defaultsValue
         }
     }
 
     @Test func userDefaultsLoadReturnsDefaultWhenNoData() {
         UserDefaults.standard.removeObject(forKey: "0")
-        let loaded = TestSettings.loadFromUserDefaults()
+        let loaded = TestSettings.load()
         #expect(loaded.value == TestSettings.defaultsValue)
     }
 
@@ -24,16 +24,16 @@ struct UserDefaultsCodableTests {
 
         let s = TestSettings()
         s.value = 123
-        s.saveToUserDefaults()
+        s.save()
 
-        let loaded = TestSettings.loadFromUserDefaults()
+        let loaded = TestSettings.load()
         #expect(loaded.value == 123)
         #expect(loaded.value != TestSettings.defaultsValue)
     }
 
     @Test func userDefaultsLoadReturnsDefaultWhenDataCorrupted() {
         UserDefaults.standard.set(Data([0xFF, 0xFF, 0xFF]), forKey: "0")
-        let loaded = TestSettings.loadFromUserDefaults()
+        let loaded = TestSettings.load()
         #expect(loaded.value == TestSettings.defaultsValue)
     }
 }
