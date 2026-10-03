@@ -148,3 +148,82 @@ struct IntCodingKeyTests {
         #expect(key?.intValue == 65) // Uses first character 'A'
     }
 }
+
+struct UnicodeCodingKeyTests {
+    @Test(arguments: [0, 255, 256, 0xD7FF, 0xE000, 0x1F600, 0x10FFFF])
+    func validScalarsRoundTrip(value: Int) throws {
+        let key = try #require(IntCodingKey(intValue: value))
+        #expect(IntCodingKey(stringValue: key.stringValue)?.intValue == value)
+    }
+
+    @Test(arguments: [Int.min, -1, 0xD800, 0xDFFF, 0x110000, Int.max])
+    func invalidScalarsAreRejected(value: Int) {
+        #expect(IntCodingKey(intValue: value) == nil)
+    }
+
+    private struct UnicodeValue: Codable, Equatable {
+        var text: String
+        var optional: String?
+
+        init(text: String, optional: String?) {
+            self.text = text
+            self.optional = optional
+        }
+
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: IntCodingKey.self)
+            text = try container.decode(String.self, forKey: 256)
+            optional = try container.decodeIfPresent(String.self, forKey: 0x1F600)
+        }
+
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: IntCodingKey.self)
+            try container.encode(text, forKey: 256)
+            try container.encodeIfPresent(optional, forKey: 0x1F600)
+        }
+    }
+
+    @Test func unicodeKeysRoundTripInJSONAndPropertyLists() throws {
+        for original in [UnicodeValue(text: "move", optional: "comment"), UnicodeValue(text: "move", optional: nil)] {
+            let json = try JSONEncoder().encode(original)
+            #expect(try JSONDecoder().decode(UnicodeValue.self, from: json) == original)
+            let plist = try PropertyListEncoder().encode(original)
+            #expect(try PropertyListDecoder().decode(UnicodeValue.self, from: plist) == original)
+        }
+    }
+
+    private struct InvalidRequiredKey: Codable {
+        init() {}
+
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: IntCodingKey.self)
+            _ = try container.decode(String.self, forKey: -1)
+        }
+
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: IntCodingKey.self)
+            try container.encode("value", forKey: -1)
+        }
+    }
+
+    private struct InvalidOptionalKey: Codable {
+        init() {}
+
+        init(from decoder: any Decoder) throws {
+            let container = try decoder.container(keyedBy: IntCodingKey.self)
+            _ = try container.decodeIfPresent(String.self, forKey: 0xD800)
+        }
+
+        func encode(to encoder: any Encoder) throws {
+            var container = encoder.container(keyedBy: IntCodingKey.self)
+            try container.encodeIfPresent("value", forKey: 0xD800)
+        }
+    }
+
+    @Test func invalidContainerKeysThrowInsteadOfTrapping() {
+        #expect(throws: EncodingError.self) { try JSONEncoder().encode(InvalidRequiredKey()) }
+        #expect(throws: EncodingError.self) { try JSONEncoder().encode(InvalidOptionalKey()) }
+        #expect(throws: DecodingError.self) { try JSONDecoder().decode(InvalidRequiredKey.self, from: Data("{}".utf8)) }
+        #expect(throws: DecodingError.self) { try JSONDecoder().decode(InvalidOptionalKey.self, from: Data("{}".utf8)) }
+    }
+}
