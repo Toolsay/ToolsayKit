@@ -14,9 +14,9 @@ public protocol UserDefaultsCodable: Codable {
 	func didSave()
 }
 
-public extension UserDefaultsCodable {
+extension UserDefaultsCodable {
 	/// Reads from user defaults. Falls back to default initialization on failure.
-	static func load() -> Self {
+	public static func load() -> Self {
 		var instance: Self
 		if let data = UserDefaults.standard.data(forKey: "0"), let loaded = try? PropertyListDecoder().decode(Self.self, from: data) {
 			instance = loaded
@@ -29,12 +29,12 @@ public extension UserDefaultsCodable {
 	}
 
 	/// Writes to user defaults. Writing can be delayed and may not complete if the app is terminated via the debugger.
-	func save() {
+	public func save() {
 		try? UserDefaults.standard.set(PropertyListEncoder().encode(self), forKey: "0")
 		didSave()
 	}
 
-	func initDefaults() {}
-	func didLoad() {}
-	func didSave() {}
+	public func initDefaults() {}
+	public func didLoad() {}
+	public func didSave() {}
 }

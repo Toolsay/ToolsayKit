@@ -18,15 +18,15 @@ public struct IntCodingKey: CodingKey {
 	}
 }
 
-public extension KeyedDecodingContainer<IntCodingKey> {
-	func decode<T>(_ type: T.Type, forKey key: Int) throws -> T where T: Decodable {
+extension KeyedDecodingContainer<IntCodingKey> {
+	public func decode<T>(_ type: T.Type, forKey key: Int) throws -> T where T: Decodable {
 		guard let codingKey = IntCodingKey(intValue: key) else {
 			throw invalidKeyError(key)
 		}
 		return try decode(type, forKey: codingKey)
 	}
 
-	func decodeIfPresent<T>(_ type: T.Type, forKey key: Int) throws -> T? where T: Decodable {
+	public func decodeIfPresent<T>(_ type: T.Type, forKey key: Int) throws -> T? where T: Decodable {
 		guard let codingKey = IntCodingKey(intValue: key) else {
 			throw invalidKeyError(key)
 		}
@@ -38,15 +38,15 @@ public extension KeyedDecodingContainer<IntCodingKey> {
 	}
 }
 
-public extension KeyedEncodingContainer<IntCodingKey> {
-	mutating func encode<T>(_ value: T, forKey key: Int) throws where T: Encodable {
+extension KeyedEncodingContainer<IntCodingKey> {
+	public mutating func encode<T>(_ value: T, forKey key: Int) throws where T: Encodable {
 		guard let codingKey = IntCodingKey(intValue: key) else {
 			throw invalidKeyError(key)
 		}
 		try encode(value, forKey: codingKey)
 	}
 
-	mutating func encodeIfPresent<T>(_ value: T?, forKey key: Int) throws where T: Encodable {
+	public mutating func encodeIfPresent<T>(_ value: T?, forKey key: Int) throws where T: Encodable {
 		guard let codingKey = IntCodingKey(intValue: key) else {
 			throw invalidKeyError(key)
 		}
